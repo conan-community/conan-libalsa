@@ -9,7 +9,7 @@ class LibalsaConan(ConanFile):
     description = "Library of ALSA: The Advanced Linux Sound Architecture, that provides audio " \
                   "and MIDI functionality to the Linux operating system"
     options = {"shared": [True, False]}
-    default_options = "shared=True"
+    default_options = "shared=False"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     build = "missing"
@@ -26,8 +26,10 @@ class LibalsaConan(ConanFile):
         ab = AutoToolsBuildEnvironment(self)
         with tools.environment_append(ab.vars):
             with tools.chdir("alsa-lib"):
-                self.run('./gitcompile --prefix="%s"' % self.package_folder)
+                static = "--enable-static=true --enable-shared=false" \
+                    if not self.options.shared else "--enable-static=false --enable-shared=true"
+                self.run('./gitcompile --prefix="%s" %s' % (self.package_folder, static))
                 self.run("make install")
 
     def package_info(self):
-        self.cpp_info.libs = ["asound"]
+        self.cpp_info.libs = ["asound", "dl", "pthread"]
