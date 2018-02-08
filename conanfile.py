@@ -1,12 +1,15 @@
-from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
+from conans import ConanFile, tools, AutoToolsBuildEnvironment
 
 
 class LibalsaConan(ConanFile):
     name = "libalsa"
     version = "1.1.5"
-    license = "<Put the package license here>"
-    url = "<Package recipe repository url here, for issues about the package>"
-    description = "<Description of Libalsa here>"
+    license = "LGPL"
+    url = "https://github.com/conan-community/conan-libalsa"
+    description = "Library of ALSA: The Advanced Linux Sound Architecture, that provides audio " \
+                  "and MIDI functionality to the Linux operating system"
+    options = {"shared": [True, False]}
+    default_options = "shared=True"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     build = "missing"
@@ -18,7 +21,6 @@ class LibalsaConan(ConanFile):
     def source(self):
         self.run("git clone git://git.alsa-project.org/alsa-lib.git")
         self.run("cd alsa-lib && git checkout v%s" % self.version)
-        
 
     def build(self):
         ab = AutoToolsBuildEnvironment(self)
