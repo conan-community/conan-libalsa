@@ -1,6 +1,6 @@
 # conan-libalsa
 
-![conan-libalsa image](conan-libalsa.png)
+![conan-libalsa image](conan_libalsa.png)
 
 [![Download](https://api.bintray.com/packages/conan-community/conan/libalsa%3Aconan/images/download.svg?version=0.1-p0%3Astable)](https://bintray.com/conan-community/conan/libalsa%3Aconan/0.1-p0%3Astable/link)
 [![Build Status](https://travis-ci.org/conan-community/conan-libalsa.svg?branch=stable%2F0.1-p0)](https://travis-ci.org/conan-community/conan-libalsa)
