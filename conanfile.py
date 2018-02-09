@@ -31,6 +31,9 @@ class LibalsaConan(ConanFile):
                 self.run('./gitcompile --prefix="%s" %s' % (self.package_folder, static))
                 self.run("make install")
 
+    def package(self):
+        self.copy("*LICENSE*", dst="licenses")
+
     def package_info(self):
         self.cpp_info.libs = ["asound", "dl", "pthread"]
         self.env_info.ALSA_CONFIG_DIR = os.path.join(self.package_folder, "share", "alsa")
