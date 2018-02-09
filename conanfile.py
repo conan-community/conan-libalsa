@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+import os
 
 
 class LibalsaConan(ConanFile):
@@ -11,8 +12,7 @@ class LibalsaConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = "shared=False"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    build = "missing"
+    build_policy = "missing"
 
     def configure(self):
         if self.settings.os != "Linux":
@@ -33,3 +33,4 @@ class LibalsaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["asound", "dl", "pthread"]
+        self.env_info.ALSA_CONFIG_DIR = os.path.join(self.package_folder, "share", "alsa")

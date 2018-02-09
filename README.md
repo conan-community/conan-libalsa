@@ -21,8 +21,29 @@ If you handle multiple dependencies in your project is better to add a *conanfil
     libalsa/1.1.5@conan/stable
 
     [generators]
-    txt
     cmake
+    
+    [imports]
+    share, *alsa.conf* -> ./bin
+    
+ 
+The libalsa need to be able to locate the ``alsa.conf`` file.
+With the above ``[imports]`` statement we are copying the ``alsa.conf`` to a local folder.
+The location can be specified with any of these environment variables:
+
+- ALSA_CONFIG_PATH: Absolute path to the ``alsa.conf`` 
+- ALSA_CONFIG_DIR: Directory where the ``alsa.conf`` is.
+
+
+Example:
+
+
+
+    
+    
+
+    
+
 
 ## License
 
