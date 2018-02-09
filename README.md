@@ -3,7 +3,7 @@
 ![conan-libalsa image](conan_libalsa.png)
 
 [![Download](https://api.bintray.com/packages/conan-community/conan/libalsa%3Aconan/images/download.svg?version=1.1.5%3Astable)](https://bintray.com/conan-community/conan/libalsa%3Aconan/1.1.5%3Astable/link)
-[![Build Status](https://travis-ci.org/conan-community/conan-libalsa.svg?branch=stable%2F1.1.5)](https://travis-ci.org/conan-community/conan-libalsa)
+[![Build Status](https://travis-ci.org/conan-community/conan-libalsa.svg?branch=release%2F1.1.5)](https://travis-ci.org/conan-community/conan-libalsa)
 
 [Conan.io](https://conan.io) package for [libalsa](https://www.alsa-project.org) project.
 
