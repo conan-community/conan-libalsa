@@ -1,6 +1,6 @@
 # conan-libalsa
 
-![conan-libalsa image](/conan-libalsa.png)
+![conan-libalsa image](conan-libalsa.png)
 
 [![Download](https://api.bintray.com/packages/conan-community/conan/libalsa%3Aconan/images/download.svg?version=0.1-p0%3Astable)](https://bintray.com/conan-community/conan/libalsa%3Aconan/0.1-p0%3Astable/link)
 [![Build Status](https://travis-ci.org/conan-community/conan-libalsa.svg?branch=stable%2F0.1-p0)](https://travis-ci.org/conan-community/conan-libalsa)
@@ -24,7 +24,7 @@ If you handle multiple dependencies in your project is better to add a *conanfil
     cmake
     
     [imports]
-    share, *alsa.conf* -> ./bin
+    share, alsa/alsa.conf -> ./bin
     
  
 The libalsa need to be able to locate the ``alsa.conf`` file.
@@ -35,13 +35,11 @@ The location can be specified with any of these environment variables:
 - ALSA_CONFIG_DIR: Directory where the ``alsa.conf`` is.
 
 
-Example:
+**Example:**
 
-
-
-    
-    
-
+    conan install .
+    //build your project in bin/ folder
+    cd bin && ALSA_CONFIG_DIR=$(pwd) ./myproject
     
 
 
