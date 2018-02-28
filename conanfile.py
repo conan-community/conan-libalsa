@@ -9,8 +9,8 @@ class LibalsaConan(ConanFile):
     url = "https://github.com/conan-community/conan-libalsa"
     description = "Library of ALSA: The Advanced Linux Sound Architecture, that provides audio " \
                   "and MIDI functionality to the Linux operating system"
-    options = {"shared": [True, False]}
-    default_options = "shared=False"
+    options = {"shared": [True, False], "disable_python": [True, False]}
+    default_options = "shared=False", "disable_python=False"
     settings = "os", "compiler", "build_type", "arch"
     build_policy = "missing"
 
@@ -25,10 +25,12 @@ class LibalsaConan(ConanFile):
     def build(self):
         ab = AutoToolsBuildEnvironment(self)
         with tools.environment_append(ab.vars):
-            with tools.chdir("alsa-lib"):
+            with tools.chdir(os.path.join(self.source_folder, "alsa-lib")):
                 static = "--enable-static=true --enable-shared=false" \
                     if not self.options.shared else "--enable-static=false --enable-shared=true"
-                self.run('./gitcompile --prefix="%s" %s' % (self.package_folder, static))
+
+                python = "--disable-python" if self.options.disable_python else ""
+                self.run('./gitcompile --prefix="%s" %s %s' % (self.package_folder, static, python))
                 self.run("make install")
 
     def package(self):
