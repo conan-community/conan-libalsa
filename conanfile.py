@@ -30,7 +30,14 @@ class LibalsaConan(ConanFile):
                     if not self.options.shared else "--enable-static=false --enable-shared=true"
 
                 python = "--disable-python" if self.options.disable_python else ""
-                self.run('./gitcompile --prefix="%s" %s %s' % (self.package_folder, static, python))
+                self.run("touch ltconfig")
+                self.run("libtoolize --force --copy --automake")
+                self.run("aclocal $ACLOCAL_FLAGS")
+                self.run("autoheader")
+                self.run("automake --foreign --copy --add-missing")
+                self.run("touch depcomp")
+                self.run("autoconf")
+                ab.configure(args=[static, python, '--prefix=%s' % self.package_folder])
                 self.run("make install")
 
     def package(self):
