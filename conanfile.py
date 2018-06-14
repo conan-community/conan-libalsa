@@ -26,9 +26,8 @@ class LibalsaConan(ConanFile):
         ab = AutoToolsBuildEnvironment(self)
         with tools.environment_append(ab.vars):
             with tools.chdir(os.path.join(self.source_folder, "alsa-lib")):
-                static = "--enable-static=true --enable-shared=false" \
-                    if not self.options.shared else "--enable-static=false --enable-shared=true"
-
+                args = ["--enable-static=yes", "--enable-shared=no"] \
+                    if not self.options.shared else ["--enable-static=no", "--enable-shared=yes"]
                 python = "--disable-python" if self.options.disable_python else ""
                 self.run("touch ltconfig")
                 self.run("libtoolize --force --copy --automake")
@@ -37,7 +36,10 @@ class LibalsaConan(ConanFile):
                 self.run("automake --foreign --copy --add-missing")
                 self.run("touch depcomp")
                 self.run("autoconf")
-                ab.configure(args=[static, python, '--prefix=%s' % self.package_folder])
+                if python:
+                    args.append(python)
+                args.append('--prefix=%s' % self.package_folder)
+                ab.configure(args=args)
                 self.run("make install")
 
     def package(self):
