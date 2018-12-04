@@ -22,6 +22,9 @@ class LibalsaConan(ConanFile):
         self.run("git clone git://git.alsa-project.org/alsa-lib.git")
         self.run("cd alsa-lib && git checkout v%s" % self.version)
 
+        tools.replace_in_file(os.path.join('alsa-lib', 'modules', 'mixer', 'simple', 'python.c'),
+                              'self->ob_type', 'Py_TYPE(self)')
+
     def build(self):
         ab = AutoToolsBuildEnvironment(self)
         with tools.environment_append(ab.vars):
