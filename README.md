@@ -1,49 +1,67 @@
-# conan-libalsa
+[![Download](https://api.bintray.com/packages/conan-community/conan/libalsa%3Aconan/images/download.svg) ](https://bintray.com/conan-community/conan/libalsa%3Aconan/_latestVersion)
+[![Build Status Travis](https://travis-ci.org/conan-community/conan-libalsa.svg)](https://travis-ci.org/conan-community/conan-libalsa)
 
-![conan-libalsa image](conan_libalsa.png)
+## Conan package recipe for *libalsa*
 
-[![Download](https://api.bintray.com/packages/conan-community/conan/libalsa%3Aconan/images/download.svg?version=1.1.5%3Astable)](https://bintray.com/conan-community/conan/libalsa%3Aconan/1.1.5%3Astable/link)
-[![Build Status](https://travis-ci.org/conan-community/conan-libalsa.svg?branch=release%2F1.1.5)](https://travis-ci.org/conan-community/conan-libalsa)
+Library of ALSA: The Advanced Linux Sound Architecture, that provides audio and MIDI functionality to the Linux operating system
 
-[Conan.io](https://conan.io) package for [libalsa](https://www.alsa-project.org) project.
+The packages generated with this **conanfile** can be found on [Bintray](https://bintray.com/conan-community/conan/libalsa%3Aconan).
 
-The packages generated with this *conanfile.py* can be found in [Bintray](https://bintray.com/conan-community/conan/libalsa%3Aconan).
 
-## Basic setup
+## Issues
+
+If you wish to report an issue or make a request for a package, please do so here:
+
+[Issues Tracker](https://github.com/conan-community/community/issues)
+
+
+## For Users
+
+### Basic setup
 
     $ conan install libalsa/1.1.5@conan/stable
 
-## Project setup
+### Project setup
 
-If you handle multiple dependencies in your project is better to add a *conanfile.txt*:
+If you handle multiple dependencies in your project is better to add a *conanfile.txt*
 
     [requires]
     libalsa/1.1.5@conan/stable
 
     [generators]
-    cmake
-    
-    [imports]
-    share, alsa/alsa.conf -> ./bin
-    
- 
-The libalsa need to be able to locate the ``alsa.conf`` file.
-With the above ``[imports]`` statement we are copying the ``alsa.conf`` to a local folder.
-The location can be specified with any of these environment variables:
+    txt
 
-- ALSA_CONFIG_PATH: Absolute path to the ``alsa.conf`` 
-- ALSA_CONFIG_DIR: Directory where the ``alsa.conf`` is.
+Complete the installation of requirements for your project running:
+
+    $ mkdir build && cd build && conan install ..
+
+Note: It is recommended that you run conan install from a build directory and not the root of the project directory.  This is because conan generates *conanbuildinfo* files specific to a single build configuration which by default comes from an autodetected default profile located in ~/.conan/profiles/default .  If you pass different build configuration options to conan install, it will generate different *conanbuildinfo* files.  Thus, they should not be added to the root of the project, nor committed to git.
 
 
-**Example:**
+## Build and package
 
-    conan install .
-    //build your project in bin/ folder
-    cd bin && ALSA_CONFIG_DIR=$(pwd) ./myproject
-    
+The following command both runs all the steps of the conan file, and publishes the package to the local system cache.  This includes downloading dependencies from "build_requires" and "requires" , and then running the build() method.
+
+    $ conan create . conan/stable
 
 
-## License
+### Available Options
+| Option        | Default | Possible Values  |
+| ------------- |:----------------- |:------------:|
+| shared      | False |  [True, False] |
+| disable_python      | False |  [True, False] |
 
-Current repo is [MIT License](LICENSE)
-Check the specific license for the library being packaged.
+
+## Add Remote
+
+Conan Community has its own Bintray repository, however, we are working to distribute all package in the Conan Center:
+
+    $ conan remote add conan-center "https://conan.bintray.com"
+
+
+## Conan Recipe License
+
+NOTE: The conan recipe license applies only to the files of this recipe, which can be used to build and package libalsa.
+It does *not* in any way apply or is related to the actual software being packaged.
+
+[MIT](LICENSE)
