@@ -12,6 +12,23 @@
 #include <sys/time.h>
 #include <math.h>
 
+
+static time_t get_current_time()
+{
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+
+    return tv.tv_sec;
+}
+
+static time_t start_time;
+
+static int is_playing()
+{
+    return (get_current_time() - start_time) < 5;
+}
+
 static char *device = "plughw:0,0";                     /* playback device */
 static snd_pcm_format_t format = SND_PCM_FORMAT_S16;    /* sample format */
 static unsigned int rate = 44100;                       /* stream rate */
@@ -25,7 +42,7 @@ static int period_event = 0;                            /* produce poll event af
 static snd_pcm_sframes_t buffer_size;
 static snd_pcm_sframes_t period_size;
 static snd_output_t *output = NULL;
-static void generate_sine(const snd_pcm_channel_area_t *areas, 
+static void generate_sine(const snd_pcm_channel_area_t *areas,
                           snd_pcm_uframes_t offset,
                           int count, double *_phase)
 {
@@ -210,7 +227,7 @@ static int set_swparams(snd_pcm_t *handle, snd_pcm_sw_params_t *swparams)
 /*
  *   Underrun and suspend recovery
  */
- 
+
 static int xrun_recovery(snd_pcm_t *handle, int err)
 {
         if (verbose)
@@ -242,7 +259,7 @@ static int write_loop(snd_pcm_t *handle,
         double phase = 0;
         signed short *ptr;
         int err, cptr;
-        while (1) {
+        while (is_playing()) {
                 generate_sine(areas, 0, period_size, &phase);
                 ptr = samples;
                 cptr = period_size;
@@ -262,14 +279,14 @@ static int write_loop(snd_pcm_t *handle,
                 }
         }
 }
- 
+
 /*
  *   Transfer method - write and wait for room in buffer using poll
  */
 static int wait_for_poll(snd_pcm_t *handle, struct pollfd *ufds, unsigned int count)
 {
         unsigned short revents;
-        while (1) {
+        while (is_playing()) {
                 poll(ufds, count, -1);
                 snd_pcm_poll_descriptors_revents(handle, ufds, count, &revents);
                 if (revents & POLLERR)
@@ -301,7 +318,7 @@ static int write_and_poll_loop(snd_pcm_t *handle,
                 return err;
         }
         init = 1;
-        while (1) {
+        while (is_playing()) {
                 if (!init) {
                         err = wait_for_poll(handle, ufds, count);
                         if (err < 0) {
@@ -374,7 +391,7 @@ static void async_callback(snd_async_handler_t *ahandler)
         snd_pcm_channel_area_t *areas = data->areas;
         snd_pcm_sframes_t avail;
         int err;
-        
+
         avail = snd_pcm_avail_update(handle);
         while (avail >= period_size) {
                 generate_sine(areas, 0, period_size, &data->phase);
@@ -426,7 +443,7 @@ static int async_loop(snd_pcm_t *handle,
         }
         /* because all other work is done in the signal handler,
            suspend the process */
-        while (1) {
+        while (is_playing()) {
                 sleep(1);
         }
 }
@@ -442,8 +459,8 @@ static void async_direct_callback(snd_async_handler_t *ahandler)
         snd_pcm_sframes_t avail, commitres;
         snd_pcm_state_t state;
         int first = 0, err;
-        
-        while (1) {
+
+        while (is_playing()) {
                 state = snd_pcm_state(handle);
                 if (state == SND_PCM_STATE_XRUN) {
                         err = xrun_recovery(handle, -EPIPE);
@@ -553,7 +570,7 @@ static int async_direct_loop(snd_pcm_t *handle,
         }
         /* because all other work is done in the signal handler,
            suspend the process */
-        while (1) {
+        while (is_playing()) {
                 sleep(1);
         }
 }
@@ -570,7 +587,7 @@ static int direct_loop(snd_pcm_t *handle,
         snd_pcm_sframes_t avail, commitres;
         snd_pcm_state_t state;
         int err, first = 1;
-        while (1) {
+        while (is_playing()) {
                 state = snd_pcm_state(handle);
                 if (state == SND_PCM_STATE_XRUN) {
                         err = xrun_recovery(handle, -EPIPE);
@@ -640,7 +657,7 @@ static int direct_loop(snd_pcm_t *handle,
                 }
         }
 }
- 
+
 /*
  *   Transfer method - direct write only using mmap_write functions
  */
@@ -651,7 +668,7 @@ static int direct_write_loop(snd_pcm_t *handle,
         double phase = 0;
         signed short *ptr;
         int err, cptr;
-        while (1) {
+        while (is_playing()) {
                 generate_sine(areas, 0, period_size, &phase);
                 ptr = samples;
                 cptr = period_size;
@@ -671,7 +688,7 @@ static int direct_write_loop(snd_pcm_t *handle,
                 }
         }
 }
- 
+
 /*
  *
  */
@@ -751,6 +768,8 @@ int main(int argc, char *argv[])
         snd_pcm_hw_params_alloca(&hwparams);
         snd_pcm_sw_params_alloca(&swparams);
         morehelp = 0;
+        start_time = get_current_time();
+
         while (1) {
                 int c;
                 if ((c = getopt_long(argc, argv, "hD:r:c:f:b:p:m:o:vne", long_option, NULL)) < 0)
@@ -839,7 +858,7 @@ int main(int argc, char *argv[])
                 printf("Playback open error: %s\n", snd_strerror(err));
                 return 0;
         }
-        
+
         if ((err = set_hwparams(handle, hwparams, transfer_methods[method].access)) < 0) {
                 printf("Setting of hwparams failed: %s\n", snd_strerror(err));
                 exit(EXIT_FAILURE);
@@ -855,7 +874,7 @@ int main(int argc, char *argv[])
                 printf("No enough memory\n");
                 exit(EXIT_FAILURE);
         }
-        
+
         areas = calloc(channels, sizeof(snd_pcm_channel_area_t));
         if (areas == NULL) {
                 printf("No enough memory\n");
