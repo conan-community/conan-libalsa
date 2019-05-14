@@ -1,37 +1,42 @@
+# -*- coding: utf-8 -*-
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
 class LibalsaConan(ConanFile):
     name = "libalsa"
     version = "1.1.5"
-    license = "LGPL"
+    license = "LGPL-2.1"
     url = "https://github.com/conan-community/conan-libalsa"
+    homepage = "https://github.com/alsa-project/alsa-lib"
+    author = "Conan Community"
+    topics = ("conan", "libalsa", "alsa", "sound", "audio", "midi")
     description = "Library of ALSA: The Advanced Linux Sound Architecture, that provides audio " \
                   "and MIDI functionality to the Linux operating system"
-    options = {"shared": [True, False], "disable_python": [True, False]}
-    default_options = "shared=False", "disable_python=False"
+    options = {"shared": [True, False], "fPIC": [True, False], "disable_python": [True, False]}
+    default_options = {'shared': False, 'fPIC': True, 'disable_python': True}
     settings = "os", "compiler", "build_type", "arch"
-    build_policy = "missing"
+    _autotools = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
         if self.settings.os != "Linux":
-            raise Exception("Only Linux supported")
+            raise ConanInvalidConfiguration("Only Linux supported")
+        del self.settings.compiler.libcxx
 
     def source(self):
-        self.run("git clone git://git.alsa-project.org/alsa-lib.git")
-        self.run("cd alsa-lib && git checkout v%s" % self.version)
+        sha256 = "418d472c6cc31d657b2f874dfbb314f26e6394d2989492a250dd71b1b6635b66"
+        tools.get("{}/archive/v{}.tar.gz".format(self.homepage, self.version), sha256=sha256)
+        os.rename("alsa-lib-{}".format(self.version), self._source_subfolder)
 
-        tools.replace_in_file(os.path.join('alsa-lib', 'modules', 'mixer', 'simple', 'python.c'),
-                              'self->ob_type', 'Py_TYPE(self)')
-
-    def build(self):
-        ab = AutoToolsBuildEnvironment(self)
-        with tools.environment_append(ab.vars):
-            with tools.chdir(os.path.join(self.source_folder, "alsa-lib")):
-                args = ["--enable-static=yes", "--enable-shared=no"] \
-                    if not self.options.shared else ["--enable-static=no", "--enable-shared=yes"]
-                python = "--disable-python" if self.options.disable_python else ""
+    def _configure_autotools(self):
+        if not self._autotools:
+            self._autotools = AutoToolsBuildEnvironment(self)
+            with tools.environment_append(self._autotools.vars):
                 self.run("touch ltconfig")
                 self.run("libtoolize --force --copy --automake")
                 self.run("aclocal $ACLOCAL_FLAGS")
@@ -39,15 +44,30 @@ class LibalsaConan(ConanFile):
                 self.run("automake --foreign --copy --add-missing")
                 self.run("touch depcomp")
                 self.run("autoconf")
-                if python:
-                    args.append(python)
-                args.append('--prefix=%s' % self.package_folder)
-                ab.configure(args=args)
-                self.run("make install")
+
+            args = ["--enable-static=yes", "--enable-shared=no"] \
+                    if not self.options.shared else ["--enable-static=no", "--enable-shared=yes"]
+            if self.options.disable_python:
+                args.append("--disable-python")
+            self._autotools.configure(args=args)
+        return self._autotools
+
+    def _patch(self):
+        python_file = os.path.join(self._source_subfolder, 'modules', 'mixer', 'simple', 'python.c')
+        tools.replace_in_file(python_file, 'self->ob_type', 'Py_TYPE(self)')
+
+    def build(self):
+        self._patch()
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
-        self.copy("*LICENSE*", dst="licenses")
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["asound", "dl", "pthread"]
+        self.cpp_info.libs = ["asound", "dl", "m", "rt", "pthread"]
         self.env_info.ALSA_CONFIG_DIR = os.path.join(self.package_folder, "share", "alsa")
