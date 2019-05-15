@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake, tools
+# -*- coding: utf-8 -*-
 import os
+from conans import ConanFile, CMake, tools
+
 
 class LibalsaTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -7,17 +9,10 @@ class LibalsaTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        # Current dir is "test_package/build/<build_id>" and CMakeLists.txt is in "test_package"
         cmake.configure()
         cmake.build()
 
-    def imports(self):
-        self.copy("*.dll", dst="bin", src="bin")
-        self.copy("*.dylib*", dst="bin", src="lib")
-        self.copy('*.so*', dst='bin', src='lib')
-        self.copy('*alsa.conf*', dst='bin', src='')
-
     def test(self):
         if not tools.cross_building(self.settings):
-            os.chdir("bin")
-            self.run(".%sexample" % os.sep)
+            bin_path = os.path.join("bin", "example")
+            self.run(bin_path, run_environment=True)
