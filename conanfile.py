@@ -6,7 +6,7 @@ import os
 
 class LibalsaConan(ConanFile):
     name = "libalsa"
-    version = "1.1.5"
+    version = "1.1.9"
     license = "LGPL-2.1"
     url = "https://github.com/conan-community/conan-libalsa"
     homepage = "https://github.com/alsa-project/alsa-lib"
@@ -29,7 +29,7 @@ class LibalsaConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def source(self):
-        sha256 = "418d472c6cc31d657b2f874dfbb314f26e6394d2989492a250dd71b1b6635b66"
+        sha256 = "be3443c69dd2cb86e751c0abaa4b74343c75db28ef13d11d19a3130a5b0ff78d"
         tools.get("{}/archive/v{}.tar.gz".format(self.homepage, self.version), sha256=sha256)
         os.rename("alsa-lib-{}".format(self.version), self._source_subfolder)
 
@@ -52,12 +52,7 @@ class LibalsaConan(ConanFile):
             self._autotools.configure(args=args)
         return self._autotools
 
-    def _patch(self):
-        python_file = os.path.join(self._source_subfolder, 'modules', 'mixer', 'simple', 'python.c')
-        tools.replace_in_file(python_file, 'self->ob_type', 'Py_TYPE(self)')
-
     def build(self):
-        self._patch()
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
