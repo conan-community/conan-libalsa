@@ -27,6 +27,7 @@ class LibalsaConan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         sha256 = "be3443c69dd2cb86e751c0abaa4b74343c75db28ef13d11d19a3130a5b0ff78d"
