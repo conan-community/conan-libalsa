@@ -1,3 +1,6 @@
+**[OBSOLETE]** The recipe is now in https://github.com/conan-io/conan-center-index
+
+
 [![Download](https://api.bintray.com/packages/conan-community/conan/libalsa%3Aconan/images/download.svg) ](https://bintray.com/conan-community/conan/libalsa%3Aconan/_latestVersion)
 [![Build Status Travis](https://travis-ci.org/conan-community/conan-libalsa.svg)](https://travis-ci.org/conan-community/conan-libalsa)
 
